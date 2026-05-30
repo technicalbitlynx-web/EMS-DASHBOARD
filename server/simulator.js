@@ -225,6 +225,72 @@ async function seedAlerts() {
   }
 }
 
+// ── alert rule evaluation ─────────────────────────────────────
+const lastAlertFired = new Map(); // key: rule_id or `door:${sensorId}`
+let cachedRules = [];
+let rulesCachedAt = 0;
+
+async function getRules() {
+  if (Date.now() - rulesCachedAt > 5 * 60 * 1000) {
+    try {
+      const { rows } = await pool.query('SELECT * FROM alert_rules WHERE enabled = true');
+      cachedRules = rows;
+      rulesCachedAt = Date.now();
+    } catch (_) {}
+  }
+  return cachedRules;
+}
+
+async function evaluateAlerts(sensorId, sensorType, payload) {
+  try {
+    if (sensorType === 'door') {
+      if (!payload.is_open) return;
+      const key = `door:${sensorId}`;
+      if (Date.now() - (lastAlertFired.get(key) || 0) < 5 * 60 * 1000) return;
+      lastAlertFired.set(key, Date.now());
+      const message = `ALERT: Door ${sensorId} has been opened`;
+      await pool.query(
+        'INSERT INTO alert_history (sensor_id, message, severity, triggered_at) VALUES ($1,$2,$3,NOW())',
+        [sensorId, message, 'critical']
+      );
+      broadcast({ type: 'sensor_update', sensor_type: 'alert', sensor_id: sensorId, payload: { severity: 'critical', message, sensor_id: sensorId }, topic: 'sim/alert' });
+      return;
+    }
+
+    const rules = (await getRules()).filter(r => r.sensor_id === sensorId);
+    for (const rule of rules) {
+      const val = payload[rule.metric];
+      if (val === undefined || val === null) continue;
+      const numVal = Number(val);
+      if (isNaN(numVal)) continue;
+      const thresh = Number(rule.threshold);
+
+      let triggered = false;
+      if      (rule.operator === '>' ) triggered = numVal >  thresh;
+      else if (rule.operator === '<' ) triggered = numVal <  thresh;
+      else if (rule.operator === '>=') triggered = numVal >= thresh;
+      else if (rule.operator === '<=') triggered = numVal <= thresh;
+      else if (rule.operator === '=' ) triggered = numVal === thresh;
+      else if (rule.operator === '!=') triggered = numVal !== thresh;
+      if (!triggered) continue;
+
+      const cooldownMs = (rule.cooldown_minutes || 15) * 60 * 1000;
+      const key = String(rule.id);
+      if (Date.now() - (lastAlertFired.get(key) || 0) < cooldownMs) continue;
+
+      lastAlertFired.set(key, Date.now());
+      const message = `${rule.severity.toUpperCase()}: ${rule.metric} ${rule.operator} ${thresh} (value: ${numVal.toFixed(2)}) on ${sensorId}`;
+      await pool.query(
+        'INSERT INTO alert_history (rule_id, sensor_id, message, severity, triggered_at) VALUES ($1,$2,$3,$4,NOW())',
+        [rule.id, sensorId, message, rule.severity]
+      );
+      broadcast({ type: 'sensor_update', sensor_type: 'alert', sensor_id: sensorId, payload: { severity: rule.severity, message, sensor_id: sensorId }, topic: 'sim/alert' });
+    }
+  } catch (err) {
+    console.error('[Sim] Alert eval error:', err.message);
+  }
+}
+
 // ── live simulation (every 30 s) ──────────────────────────────
 function startLive() {
   async function tick() {
@@ -238,6 +304,7 @@ function startLive() {
           [sensor.id, sensor.type, new Date(ts).toISOString(), val, JSON.stringify(payload), UNIT[sensor.type] || '']
         );
         broadcast({ type: 'sensor_update', sensor_type: sensor.type, sensor_id: sensor.id, payload, topic: `sim/${sensor.type}/${sensor.id}` });
+        await evaluateAlerts(sensor.id, sensor.type, payload);
       } catch (err) {
         console.error('[Sim] Tick error:', err.message);
       }

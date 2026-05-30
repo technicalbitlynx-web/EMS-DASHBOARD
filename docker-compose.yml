@@ -70,6 +70,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ems_secure_2026}
       MQTT_BROKER: ${MQTT_BROKER:-mqtt://mosquitto:1883}
       JWT_SECRET: ${JWT_SECRET:-ems_jwt_secret_change_in_production}
+      ENABLE_SIMULATOR: ${ENABLE_SIMULATOR:-false}
       TZ: Africa/Dar_es_Salaam
     depends_on:
       db:

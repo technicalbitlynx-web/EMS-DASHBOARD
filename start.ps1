@@ -1,4 +1,5 @@
 # EMS Dashboard — Native Windows startup (no Docker required)
+# Prerequisites: Node.js 20+, PostgreSQL 16 (local or Supabase), Mosquitto (optional)
 # Run: .\start.ps1
 
 $ProjectDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
@@ -6,7 +7,9 @@ Set-Location $ProjectDir
 
 # Check .env exists
 if (-not (Test-Path ".env")) {
-    Write-Host "[!] No .env file found. Copy .env.example to .env and fill in your Supabase URL." -ForegroundColor Yellow
+    Write-Host "[!] No .env file found. Copying .env.example → .env" -ForegroundColor Yellow
+    Copy-Item ".env.example" ".env"
+    Write-Host "[!] Edit .env and set DATABASE_URL (Supabase) or POSTGRES_* vars, then re-run." -ForegroundColor Yellow
     exit 1
 }
 
