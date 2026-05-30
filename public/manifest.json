@@ -1,13 +1,16 @@
 {
+  "id": "com.ems.dashboard",
   "name": "Bank Server Room EMS",
   "short_name": "EMS",
   "description": "Environmental Monitoring System — Bank Server Room",
+  "categories": ["business"],
+  "dir": "ltr",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0f172a",
   "theme_color": "#2563eb",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/icons/icon-192.png",
