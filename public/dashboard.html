@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>EMS Dashboard — Bank Server Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+/* ── Reset & Theme ───────────────────────────────────────────── */
+:root{
+  --bg:#f0f4f8;--card:#fff;--card2:#f8fafc;--border:#e2e8f0;
+  --text:#1e293b;--sub:#64748b;--nav:#1e293b;--nav-text:#f1f5f9;
+  --primary:#2563eb;--primary-hov:#1d4ed8;
+  --normal:#22c55e;--warning:#f59e0b;--critical:#ef4444;
+  --shadow:0 2px 12px rgba(0,0,0,.07);--radius:12px;
+}
+[data-theme=dark]{
+  --bg:#0f172a;--card:#1e293b;--card2:#0f172a;--border:#334155;
+  --text:#f1f5f9;--sub:#94a3b8;--nav:#020617;--nav-text:#f1f5f9;
+  --shadow:0 2px 12px rgba(0,0,0,.4);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{font-family:'Poppins',sans-serif;cursor:pointer}
+input,select,textarea{font-family:'Poppins',sans-serif}
+
+/* ── Navbar ─────────────────────────────────────────────────── */
+#navbar{
+  background:var(--nav);color:var(--nav-text);
+  display:flex;align-items:center;gap:12px;padding:0 16px;
+  height:56px;position:sticky;top:0;z-index:100;flex-shrink:0;
+}
+.nav-brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:1rem;white-space:nowrap}
+.nav-brand i{color:var(--primary);font-size:1.2rem}
+.nav-tabs{display:flex;gap:2px;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-tabs::-webkit-scrollbar{display:none}
+.nav-tab{
+  padding:6px 14px;border:none;background:transparent;color:#94a3b8;
+  font-size:.78rem;font-weight:500;border-radius:6px;white-space:nowrap;transition:all .15s;
+  position:relative;
+}
+.nav-tab:hover{background:#ffffff18;color:#fff}
+.nav-tab.active{background:var(--primary);color:#fff}
+.nav-tab .badge{
+  position:absolute;top:2px;right:2px;background:var(--critical);color:#fff;
+  font-size:.6rem;width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.nav-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+.user-pill{font-size:.78rem;color:#94a3b8;display:flex;align-items:center;gap:6px}
+.icon-btn{
+  width:32px;height:32px;border:none;background:#ffffff18;color:var(--nav-text);
+  border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.85rem;
+  transition:background .15s;
+}
+.icon-btn:hover{background:#ffffff30}
+
+/* ── Layout ─────────────────────────────────────────────────── */
+#app{padding:20px;max-width:1400px;margin:0 auto}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* ── Common Cards ───────────────────────────────────────────── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.card-sm{padding:14px}
+.section-title{font-size:.9rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.section-title i{color:var(--primary)}
+
+/* ── Status Colors ──────────────────────────────────────────── */
+.status-normal  {color:var(--normal) }
+.status-warning {color:var(--warning)}
+.status-critical{color:var(--critical)}
+.badge-normal  {background:#dcfce7;color:#166534;border-radius:20px;padding:2px 10px;font-size:.72rem;font-weight:600}
+.badge-warning {background:#fef9c3;color:#854d0e;border-radius:20px;padding:2px 10px;font-size:.72rem;font-weight:600}
+.badge-critical{background:#fee2e2;color:#991b1b;border-radius:20px;padding:2px 10px;font-size:.72rem;font-weight:600}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dot-normal  {background:var(--normal) }
+.dot-warning {background:var(--warning)}
+.dot-critical{background:var(--critical)}
+
+/* ── Grids ──────────────────────────────────────────────────── */
+.grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+@media(max-width:900px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-3{grid-template-columns:1fr}}
+@media(max-width:600px){.grid-2{grid-template-columns:1fr}.grid-4{grid-template-columns:1fr}}
+
+/* ── Sensor Card (Overview) ─────────────────────────────────── */
+.sensor-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;box-shadow:var(--shadow);transition:transform .15s;
+}
+.sensor-card:hover{transform:translateY(-2px)}
+.sensor-card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.sensor-card-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem}
+.icon-temp   {background:#dbeafe;color:#1d4ed8}
+.icon-power  {background:#fef9c3;color:#854d0e}
+.icon-door   {background:#f3e8ff;color:#7c3aed}
+.icon-smoke  {background:#fee2e2;color:#991b1b}
+.icon-dehum  {background:#d1fae5;color:#065f46}
+.sensor-name {font-size:.8rem;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sensor-loc  {font-size:.7rem;color:var(--sub)}
+.sensor-val  {font-size:1.6rem;font-weight:700;line-height:1.2;margin:8px 0 4px}
+.sensor-unit {font-size:.75rem;color:var(--sub)}
+.sensor-time {font-size:.7rem;color:var(--sub);margin-top:6px}
+
+/* ── SVG Gauge ──────────────────────────────────────────────── */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
+.gauge-svg{width:140px;height:140px}
+.gauge-track{fill:none;stroke:var(--border);stroke-width:9;stroke-linecap:round}
+.gauge-arc  {fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .5s,stroke .3s}
+.gauge-val  {font-size:1.1rem;font-weight:700;fill:var(--text)}
+.gauge-unit {font-size:.55rem;fill:var(--sub)}
+.gauge-lbl  {font-size:.65rem;font-weight:600;fill:var(--sub)}
+
+/* ── Charts ─────────────────────────────────────────────────── */
+.chart-wrap{position:relative;height:220px}
+
+/* ── Door Tile ──────────────────────────────────────────────── */
+.door-tile{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;text-align:center;box-shadow:var(--shadow);
+}
+.door-icon{font-size:2.4rem;margin-bottom:8px}
+.door-name{font-size:.85rem;font-weight:600;margin-bottom:4px}
+.door-state{font-size.78rem;font-weight:700}
+.door-time{font-size:.7rem;color:var(--sub);margin-top:6px}
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{background:var(--card2);padding:10px 12px;text-align:left;font-weight:600;font-size:.75rem;color:var(--sub);white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--border)}
+tr:hover td{background:var(--card2)}
+.no-data{padding:32px;text-align:center;color:var(--sub);font-size:.85rem}
+
+/* ── Buttons ─────────────────────────────────────────────────── */
+.btn{
+  padding:8px 18px;border:none;border-radius:8px;font-size:.82rem;font-weight:600;
+  font-family:'Poppins',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;
+}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-hov)}
+.btn-success{background:#16a34a;color:#fff}.btn-success:hover{background:#15803d}
+.btn-danger {background:var(--critical);color:#fff}.btn-danger:hover{background:#dc2626}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--text)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:5px 12px;font-size:.75rem}
+
+/* ── Forms ──────────────────────────────────────────────────── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-group{display:flex;flex-direction:column;gap:4px}
+label{font-size:.78rem;font-weight:500;color:var(--sub)}
+input,select{
+  padding:8px 12px;background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.85rem;outline:none;
+}
+input:focus,select:focus{border-color:var(--primary)}
+
+/* ── Alert List ─────────────────────────────────────────────── */
+.alert-item{
+  display:flex;align-items:flex-start;gap:12px;padding:12px 14px;
+  border-radius:10px;margin-bottom:8px;border-left:4px solid;
+}
+.alert-item.critical{background:#fef2f2;border-color:var(--critical)}
+.alert-item.warning {background:#fffbeb;border-color:var(--warning)}
+[data-theme=dark] .alert-item.critical{background:#450a0a}
+[data-theme=dark] .alert-item.warning {background:#451a03}
+.alert-msg{flex:1;font-size:.82rem;font-weight:500}
+.alert-time{font-size:.72rem;color:var(--sub);margin-top:2px}
+
+/* ── Dehumidifier state ─────────────────────────────────────── */
+.dehum-state{
+  width:120px;height:120px;border-radius:50%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-size:1rem;font-weight:700;margin:0 auto;
+  border:6px solid;transition:all .4s;
+}
+.dehum-on {border-color:var(--normal);color:var(--normal);background:#f0fdf4}
+.dehum-off{border-color:var(--border);color:var(--sub);background:var(--card2)}
+[data-theme=dark] .dehum-on {background:#052e16}
+
+/* ── Modal ──────────────────────────────────────────────────── */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+  box-shadow:0 16px 48px rgba(0,0,0,.2);
+}
+.modal h3{font-size:1rem;margin-bottom:20px}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+/* ── Reports ─────────────────────────────────────────────────── */
+.report-row{display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.report-row .form-group{min-width:140px}
+
+/* ── Stat boxes ─────────────────────────────────────────────── */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:700px){.stat-grid{grid-template-columns:1fr 1fr}}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;box-shadow:var(--shadow)}
+.stat-lbl{font-size:.72rem;color:var(--sub);font-weight:500}
+.stat-val{font-size:1.5rem;font-weight:700;margin-top:2px}
+
+/* ── Toast ──────────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:20px;right:20px;background:#1e293b;color:#f1f5f9;
+  padding:10px 18px;border-radius:10px;font-size:.82rem;font-weight:500;
+  transform:translateY(80px);transition:transform .25s;z-index:999;display:flex;align-items:center;gap:8px;
+}
+#toast.show{transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav id="navbar">
+  <div class="nav-brand">
+    <i class="fa-solid fa-server"></i>
+    <span>Bank EMS</span>
+  </div>
+  <div class="nav-tabs" id="nav-tabs">
+    <button class="nav-tab active" data-tab="overview">    <i class="fa-solid fa-grip"></i> Overview</button>
+    <button class="nav-tab"        data-tab="environment"> <i class="fa-solid fa-thermometer-half"></i> Environment</button>
+    <button class="nav-tab"        data-tab="power">       <i class="fa-solid fa-bolt"></i> Power</button>
+    <button class="nav-tab"        data-tab="access">      <i class="fa-solid fa-door-open"></i> Access</button>
+    <button class="nav-tab"        data-tab="airquality">  <i class="fa-solid fa-smog"></i> Air Quality</button>
+    <button class="nav-tab"        data-tab="dehumidifier"><i class="fa-solid fa-droplet"></i> Dehumidifier</button>
+    <button class="nav-tab" id="alerts-tab" data-tab="alerts">
+      <i class="fa-solid fa-bell"></i> Alerts<span class="badge" id="alert-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-tab"        data-tab="reports">     <i class="fa-solid fa-file-export"></i> Reports</button>
+    <button class="nav-tab" id="admin-tab-btn" data-tab="admin" style="display:none">
+      <i class="fa-solid fa-cog"></i> Admin
+    </button>
+  </div>
+  <div class="nav-right">
+    <span class="user-pill" id="user-pill"><i class="fa-solid fa-user-circle"></i> <span id="user-name">—</span></span>
+    <button class="icon-btn" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke"></i></button>
+    <button class="icon-btn" onclick="doLogout()" title="Sign out"><i class="fa-solid fa-right-from-bracket"></i></button>
+  </div>
+</nav>
+
+<div id="app">
+
+<!-- ════ OVERVIEW ═══════════════════════════════════════════ -->
+<section id="tab-overview" class="tab-panel active">
+  <div class="stat-grid" id="stat-grid">
+    <div class="stat-box"><div class="stat-lbl">Total Sensors</div><div class="stat-val" id="stat-sensors">—</div></div>
+    <div class="stat-box"><div class="stat-lbl">Active Alerts</div><div class="stat-val status-critical" id="stat-alerts">—</div></div>
+    <div class="stat-box"><div class="stat-lbl">Critical</div><div class="stat-val status-critical" id="stat-critical">—</div></div>
+    <div class="stat-box"><div class="stat-lbl">Last Update</div><div class="stat-val" style="font-size:.9rem" id="stat-updated">—</div></div>
+  </div>
+  <div class="grid-auto" id="overview-grid"></div>
+</section>
+
+<!-- ════ ENVIRONMENT ═════════════════════════════════════════ -->
+<section id="tab-environment" class="tab-panel">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+    <div class="section-title" style="margin:0"><i class="fa-solid fa-thermometer-half"></i> Temperature & Humidity</div>
+    <select id="env-zone-select" style="padding:6px 12px;border-radius:8px;min-width:180px" onchange="loadEnvData()"></select>
+  </div>
+  <div class="grid-2" style="margin-bottom:16px">
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div class="section-title" style="margin:0">Temperature</div>
+      <svg class="gauge-svg" viewBox="0 0 100 100" id="gauge-temp">
+        <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc"   cx="50" cy="50" r="42" stroke="#22c55e" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)" id="gauge-temp-arc"/>
+        <text class="gauge-val"  x="50" y="47" text-anchor="middle" id="gauge-temp-val">—</text>
+        <text class="gauge-unit" x="50" y="58" text-anchor="middle">°C</text>
+        <text class="gauge-lbl"  x="50" y="70" text-anchor="middle">Temperature</text>
+      </svg>
+      <div id="temp-status" class="badge-normal">Normal</div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:8px">
+      <div class="section-title" style="margin:0">Humidity</div>
+      <svg class="gauge-svg" viewBox="0 0 100 100" id="gauge-hum">
+        <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc"   cx="50" cy="50" r="42" stroke="#22c55e" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)" id="gauge-hum-arc"/>
+        <text class="gauge-val"  x="50" y="47" text-anchor="middle" id="gauge-hum-val">—</text>
+        <text class="gauge-unit" x="50" y="58" text-anchor="middle">% RH</text>
+        <text class="gauge-lbl"  x="50" y="70" text-anchor="middle">Humidity</text>
+      </svg>
+      <div id="hum-status" class="badge-normal">Normal</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-chart-line"></i> 24-Hour Trend</div>
+    <div class="chart-wrap"><canvas id="chart-env"></canvas></div>
+  </div>
+</section>
+
+<!-- ════ POWER ═══════════════════════════════════════════════ -->
+<section id="tab-power" class="tab-panel">
+  <div class="section-title"><i class="fa-solid fa-bolt"></i> Main Power Feed</div>
+  <div class="grid-4" style="margin-bottom:16px" id="power-gauges">
+    <div class="card" style="text-align:center">
+      <div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;font-weight:600">VOLTAGE</div>
+      <svg class="gauge-svg" viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc" id="gauge-volt-arc" cx="50" cy="50" r="42" stroke="#2563eb" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+        <text class="gauge-val" x="50" y="47" text-anchor="middle" id="gauge-volt-val">—</text>
+        <text class="gauge-unit" x="50" y="58" text-anchor="middle">V</text>
+      </svg>
+      <div id="volt-range" style="font-size:.7rem;color:var(--sub);margin-top:4px">220–240 V nominal</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;font-weight:600">CURRENT</div>
+      <svg class="gauge-svg" viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc" id="gauge-curr-arc" cx="50" cy="50" r="42" stroke="#22c55e" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+        <text class="gauge-val" x="50" y="47" text-anchor="middle" id="gauge-curr-val">—</text>
+        <text class="gauge-unit" x="50" y="58" text-anchor="middle">A</text>
+      </svg>
+      <div style="font-size:.7rem;color:var(--sub);margin-top:4px">Warn &gt;80A / Crit &gt;100A</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;font-weight:600">ACTIVE POWER</div>
+      <svg class="gauge-svg" viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc" id="gauge-pwr-arc" cx="50" cy="50" r="42" stroke="#8b5cf6" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+        <text class="gauge-val" x="50" y="47" text-anchor="middle" id="gauge-pwr-val">—</text>
+        <text class="gauge-unit" x="50" y="58" text-anchor="middle">W</text>
+      </svg>
+      <div style="font-size:.7rem;color:var(--sub);margin-top:4px">Rated load: 24 kW</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;font-weight:600">POWER FACTOR</div>
+      <svg class="gauge-svg" viewBox="0 0 100 100">
+        <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc" id="gauge-pf-arc" cx="50" cy="50" r="42" stroke="#22c55e" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+        <text class="gauge-val" x="50" y="47" text-anchor="middle" id="gauge-pf-val">—</text>
+        <text class="gauge-unit" x="50" y="58" text-anchor="middle">PF</text>
+      </svg>
+      <div id="pf-status" class="badge-normal" style="margin-top:4px">Normal</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="section-title"><i class="fa-solid fa-plug-circle-bolt"></i> Energy Accumulator</div>
+      <div style="font-size:2.5rem;font-weight:800;color:var(--primary)" id="energy-kwh">—</div>
+      <div style="font-size:.78rem;color:var(--sub);margin-top:4px">kWh total</div>
+    </div>
+    <div class="card">
+      <div class="section-title"><i class="fa-solid fa-chart-area"></i> 24-Hour Power Trend</div>
+      <div class="chart-wrap"><canvas id="chart-power"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ ACCESS ══════════════════════════════════════════════ -->
+<section id="tab-access" class="tab-panel">
+  <div class="section-title"><i class="fa-solid fa-door-open"></i> Door & Access Status</div>
+  <div class="grid-auto" id="door-grid" style="margin-bottom:20px"></div>
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-list"></i> Recent Access Events</div>
+    <div class="tbl-wrap"><table id="door-log-table">
+      <thead><tr><th>Timestamp</th><th>Door</th><th>Location</th><th>State</th></tr></thead>
+      <tbody id="door-log-body"><tr><td colspan="4" class="no-data">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ════ AIR QUALITY ═════════════════════════════════════════ -->
+<section id="tab-airquality" class="tab-panel">
+  <div class="section-title"><i class="fa-solid fa-smog"></i> Smoke & Gas Detectors</div>
+  <div class="grid-auto" id="smoke-grid"></div>
+</section>
+
+<!-- ════ DEHUMIDIFIER ════════════════════════════════════════ -->
+<section id="tab-dehumidifier" class="tab-panel">
+  <div class="section-title"><i class="fa-solid fa-droplet"></i> Dehumidifier Status</div>
+  <div class="grid-2">
+    <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:32px">
+      <div class="dehum-state dehum-off" id="dehum-state">
+        <i class="fa-solid fa-fan" style="font-size:2rem;margin-bottom:6px"></i>
+        <span id="dehum-state-lbl">OFF</span>
+      </div>
+      <div style="text-align:center">
+        <div style="font-weight:700;font-size:1rem" id="dehum-name">Dantherm CDP 45</div>
+        <div style="font-size:.78rem;color:var(--sub)" id="dehum-location">North Wall</div>
+      </div>
+      <div style="font-size:.78rem;color:var(--sub)" id="dehum-last">Last update: —</div>
+    </div>
+    <div class="card">
+      <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> State History</div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Timestamp</th><th>State</th></tr></thead>
+        <tbody id="dehum-log-body"><tr><td colspan="2" class="no-data">Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ ALERTS ══════════════════════════════════════════════ -->
+<section id="tab-alerts" class="tab-panel">
+  <div class="grid-2">
+    <div>
+      <div class="section-title"><i class="fa-solid fa-triangle-exclamation"></i> Active Alerts</div>
+      <div id="active-alerts-list"><div class="no-data">No active alerts</div></div>
+    </div>
+    <div>
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span><i class="fa-solid fa-history"></i> Alert History</span>
+        <select id="alert-hist-severity" onchange="loadAlertHistory()" style="padding:4px 10px;border-radius:6px;font-size:.75rem">
+          <option value="">All</option>
+          <option value="critical">Critical</option>
+          <option value="warning">Warning</option>
+        </select>
+      </div>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Time</th><th>Sensor</th><th>Severity</th><th>Message</th><th>Ack</th></tr></thead>
+        <tbody id="alert-hist-body"><tr><td colspan="5" class="no-data">Loading…</td></tr></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <div class="section-title" style="justify-content:space-between">
+      <span><i class="fa-solid fa-sliders"></i> Alert Rules</span>
+      <button class="btn btn-primary btn-sm" onclick="openRuleModal()"><i class="fa-solid fa-plus"></i> Add Rule</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Sensor</th><th>Metric</th><th>Condition</th><th>Severity</th><th>Cooldown</th><th>Enabled</th><th></th></tr></thead>
+      <tbody id="rules-body"><tr><td colspan="7" class="no-data">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ════ REPORTS ═════════════════════════════════════════════ -->
+<section id="tab-reports" class="tab-panel">
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-title"><i class="fa-solid fa-file-csv"></i> Sensor Data Export</div>
+    <div class="report-row">
+      <div class="form-group"><label>From</label><input type="datetime-local" id="rpt-from"/></div>
+      <div class="form-group"><label>To</label><input type="datetime-local" id="rpt-to"/></div>
+      <div class="form-group"><label>Sensor Type</label>
+        <select id="rpt-type">
+          <option value="">All Types</option>
+          <option value="temperature">Temperature</option>
+          <option value="power">Power</option>
+          <option value="door">Door</option>
+          <option value="smoke">Smoke/Gas</option>
+          <option value="dehumidifier">Dehumidifier</option>
+        </select>
+      </div>
+      <div class="form-group" style="justify-content:flex-end">
+        <button class="btn btn-success" onclick="downloadCsv()"><i class="fa-solid fa-download"></i> Download CSV</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-title"><i class="fa-solid fa-file-pdf"></i> PDF Report</div>
+    <div class="report-row">
+      <div class="form-group"><label>From</label><input type="datetime-local" id="pdf-from"/></div>
+      <div class="form-group"><label>To</label><input type="datetime-local" id="pdf-to"/></div>
+      <div class="form-group" style="justify-content:flex-end">
+        <button class="btn btn-danger" onclick="generatePdf()"><i class="fa-solid fa-file-pdf"></i> Generate PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-bell-slash"></i> Alert Export</div>
+    <div class="report-row">
+      <div class="form-group"><label>From</label><input type="datetime-local" id="alt-from"/></div>
+      <div class="form-group"><label>To</label><input type="datetime-local" id="alt-to"/></div>
+      <div class="form-group" style="justify-content:flex-end">
+        <button class="btn btn-outline" onclick="downloadAlertsCsv()"><i class="fa-solid fa-download"></i> Export Alerts CSV</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ ADMIN ════════════════════════════════════════════════ -->
+<section id="tab-admin" class="tab-panel">
+  <!-- Users -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-title" style="justify-content:space-between">
+      <span><i class="fa-solid fa-users-gear"></i> User Management</span>
+      <button class="btn btn-primary btn-sm" onclick="openUserModal()"><i class="fa-solid fa-plus"></i> Add User</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Username</th><th>Full Name</th><th>Email</th><th>Role</th><th>Department</th><th>Last Login</th><th></th></tr></thead>
+      <tbody id="users-body"><tr><td colspan="7" class="no-data">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <!-- Sensors -->
+  <div class="card" style="margin-bottom:16px">
+    <div class="section-title" style="justify-content:space-between">
+      <span><i class="fa-solid fa-microchip"></i> Sensor Registry</span>
+      <button class="btn btn-primary btn-sm" onclick="openSensorModal()"><i class="fa-solid fa-plus"></i> Add Sensor</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>ID</th><th>Type</th><th>Name</th><th>Location</th><th>Zone</th><th>MQTT Topic</th><th>Enabled</th><th></th></tr></thead>
+      <tbody id="sensors-body"><tr><td colspan="8" class="no-data">Loading…</td></tr></tbody>
+    </table></div>
+  </div>
+
+  <!-- Settings -->
+  <div class="card">
+    <div class="section-title"><i class="fa-solid fa-sliders"></i> Data Retention</div>
+    <div class="report-row" style="align-items:flex-end">
+      <div class="form-group">
+        <label>Retention Period (days)</label>
+        <input type="number" id="retention-days" value="90" min="7" max="365" style="width:120px"/>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="applyRetention()"><i class="fa-solid fa-trash"></i> Apply Now</button>
+    </div>
+  </div>
+</section>
+
+</div><!-- #app -->
+
+<!-- Toast -->
+<div id="toast"><i class="fa-solid fa-circle-info"></i> <span id="toast-msg"></span></div>
+
+<!-- Modal: Add User -->
+<div class="modal-overlay" id="modal-user">
+  <div class="modal">
+    <h3><i class="fa-solid fa-user-plus"></i> Create User</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-row">
+        <div class="form-group"><label>Full Name</label><input id="mu-name" type="text"/></div>
+        <div class="form-group"><label>Email</label><input id="mu-email" type="email"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Username</label><input id="mu-uname" type="text"/></div>
+        <div class="form-group"><label>Password</label><input id="mu-pass" type="password"/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Role</label>
+          <select id="mu-role"><option value="viewer">Viewer</option><option value="operator">Operator</option><option value="admin">Admin</option></select>
+        </div>
+        <div class="form-group"><label>Department</label><input id="mu-dept" type="text" value="IT Operations"/></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-user')">Cancel</button>
+      <button class="btn btn-primary" onclick="createUser()"><i class="fa-solid fa-check"></i> Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Sensor -->
+<div class="modal-overlay" id="modal-sensor">
+  <div class="modal">
+    <h3><i class="fa-solid fa-microchip"></i> Register Sensor</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-row">
+        <div class="form-group"><label>ID (unique)</label><input id="ms-id" type="text" placeholder="temp_zone3"/></div>
+        <div class="form-group"><label>Type</label>
+          <select id="ms-type">
+            <option value="temperature">Temperature</option>
+            <option value="power">Power</option>
+            <option value="door">Door</option>
+            <option value="smoke">Smoke</option>
+            <option value="dehumidifier">Dehumidifier</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Name</label><input id="ms-name" type="text" placeholder="Temperature Zone 3"/></div>
+      <div class="form-row">
+        <div class="form-group"><label>Location</label><input id="ms-loc" type="text" placeholder="Server Aisle C"/></div>
+        <div class="form-group"><label>Zone</label><input id="ms-zone" type="text" placeholder="Zone 3"/></div>
+      </div>
+      <div class="form-group"><label>MQTT Topic</label><input id="ms-topic" type="text" placeholder="ems/raw/temperature/zone3"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-sensor')">Cancel</button>
+      <button class="btn btn-primary" onclick="createSensor()"><i class="fa-solid fa-check"></i> Register</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Alert Rule -->
+<div class="modal-overlay" id="modal-rule">
+  <div class="modal">
+    <h3><i class="fa-solid fa-bell-ring"></i> Create Alert Rule</h3>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="form-group"><label>Sensor</label><select id="mr-sensor" style="width:100%"></select></div>
+      <div class="form-row">
+        <div class="form-group"><label>Metric</label><input id="mr-metric" type="text" placeholder="temp_c"/></div>
+        <div class="form-group"><label>Operator</label>
+          <select id="mr-op"><option value=">">&gt;</option><option value="<">&lt;</option><option value=">=">&ge;</option><option value="<=">&le;</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Threshold</label><input id="mr-thresh" type="number" step="0.01"/></div>
+        <div class="form-group"><label>Severity</label>
+          <select id="mr-sev"><option value="warning">Warning</option><option value="critical">Critical</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label>Cooldown (minutes)</label><input id="mr-cooldown" type="number" value="15" min="1"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-rule')">Cancel</button>
+      <button class="btn btn-primary" onclick="createRule()"><i class="fa-solid fa-check"></i> Create Rule</button>
+    </div>
+  </div>
+</div>
+
+<!-- CDN Libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.1/jspdf.plugin.autotable.min.js"></script>
+<script src="/app-api.js"></script>
+<script>
+'use strict';
+
+// ── Auth guard ───────────────────────────────────────────────
+if (!EmsApi.isLoggedIn()) window.location.href = '/';
+const USER = EmsApi.getUser();
+if (USER) {
+  document.getElementById('user-name').textContent = USER.full_name || USER.username;
+  if (USER.role === 'admin') document.getElementById('admin-tab-btn').style.display = '';
+}
+
+// ── Theme ────────────────────────────────────────────────────
+function toggleTheme() {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('ems_theme', t);
+  Object.values(charts).forEach(c => { if (c) { c.options.plugins.legend.labels.color = t === 'dark' ? '#94a3b8' : '#64748b'; c.update(); } });
+}
+document.documentElement.setAttribute('data-theme', localStorage.getItem('ems_theme') || 'light');
+
+// ── Logout ───────────────────────────────────────────────────
+function doLogout() { EmsApi.clearSession(); window.location.href = '/'; }
+
+// ── State ─────────────────────────────────────────────────────
+const state = {
+  sensors: [],
+  latest: {},       // keyed by sensor_id
+  activeAlerts: [],
+  currentTab: 'overview',
+};
+
+// ── Charts ────────────────────────────────────────────────────
+const charts = { env: null, power: null };
+
+function chartDefaults() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { labels: { color: dark ? '#94a3b8' : '#64748b', font: { family: 'Poppins', size: 11 } } } },
+    scales: {
+      x: { ticks: { color: dark ? '#64748b' : '#94a3b8', maxRotation: 0, font: { size: 10 } }, grid: { color: dark ? '#1e293b' : '#f1f5f9' } },
+      y: { ticks: { color: dark ? '#64748b' : '#94a3b8', font: { size: 10 } }, grid: { color: dark ? '#1e293b' : '#f1f5f9' } },
+    },
+  };
+}
+
+// ── Gauge helper ─────────────────────────────────────────────
+const CIRC = 263.9;
+function setGauge(arcId, valId, value, min, max, unit, statusEl) {
+  const pct = Math.min(Math.max((value - min) / (max - min), 0), 1);
+  const arc = document.getElementById(arcId);
+  const lbl = document.getElementById(valId);
+  if (arc) arc.setAttribute('stroke-dashoffset', String((1 - pct) * CIRC));
+  if (lbl) lbl.textContent = isNaN(value) ? '—' : (Number.isInteger(value) ? value : value.toFixed(1));
+  if (statusEl) {
+    const el = document.getElementById(statusEl);
+    if (!el) return;
+    const cls = arc ? arc.getAttribute('stroke') : '';
+    el.className = 'badge-normal'; el.textContent = 'Normal';
+  }
+}
+
+function setGaugeColor(arcId, color) {
+  const el = document.getElementById(arcId);
+  if (el) el.setAttribute('stroke', color);
+}
+
+function statusColor(status) {
+  return status === 'critical' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#22c55e';
+}
+function statusBadge(status) {
+  return status === 'critical' ? 'badge-critical' : status === 'warning' ? 'badge-warning' : 'badge-normal';
+}
+function statusText(status) {
+  return status === 'critical' ? 'Critical' : status === 'warning' ? 'Warning' : 'Normal';
+}
+
+// ── Toast ────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg, dur = 3000) {
+  document.getElementById('toast-msg').textContent = msg;
+  const el = document.getElementById('toast');
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+}
+
+// ── Tabs ──────────────────────────────────────────────────────
+document.querySelectorAll('.nav-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tab));
+  state.currentTab = tab;
+  if (tab === 'environment') loadEnvData();
+  if (tab === 'power')       loadPowerData();
+  if (tab === 'access')      loadAccessData();
+  if (tab === 'airquality')  renderSmokeGrid();
+  if (tab === 'dehumidifier') loadDehumData();
+  if (tab === 'alerts')      { loadActiveAlerts(); loadAlertHistory(); loadAlertRules(); }
+  if (tab === 'admin')       { loadUsers(); loadAdminSensors(); }
+}
+
+// ── Format helpers ───────────────────────────────────────────
+function fmtTs(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+// ── WebSocket ────────────────────────────────────────────────
+function connectWs() {
+  const ws = new WebSocket('ws://' + location.host + '/ws');
+  ws.onmessage = (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'sensor_update') handleSensorUpdate(msg);
+  };
+  ws.onclose = () => setTimeout(connectWs, 5000);
+}
+
+function handleSensorUpdate(msg) {
+  const { sensor_type, sensor_id, payload } = msg;
+  if (!payload || !sensor_id) return;
+  state.latest[sensor_id] = { ...payload, sensor_id, sensor_type, _ts: Date.now() };
+  document.getElementById('stat-updated').textContent = new Date().toLocaleTimeString();
+
+  if (sensor_type === 'temperature' && state.currentTab === 'environment') {
+    const sel = document.getElementById('env-zone-select');
+    if (sel && sel.value === sensor_id) updateEnvGauges(payload);
+  }
+  if (sensor_type === 'power' && state.currentTab === 'power') updatePowerGauges(payload);
+  if (sensor_type === 'door')          updateDoorTile(sensor_id, payload);
+  if (sensor_type === 'smoke')         updateSmokeTile(sensor_id, payload);
+  if (sensor_type === 'dehumidifier' && state.currentTab === 'dehumidifier') updateDehumState(payload, sensor_id);
+  if (sensor_type === 'alert')         { loadActiveAlerts(); }
+
+  updateOverviewCard(sensor_id, sensor_type, payload);
+}
+
+// ── Overview ─────────────────────────────────────────────────
+function renderOverview() {
+  const grid = document.getElementById('overview-grid');
+  grid.innerHTML = '';
+  state.sensors.forEach(s => {
+    const latest = state.latest[s.id] || {};
+    const status = latest.status || 'normal';
+    const icon = { temperature: 'fa-thermometer-half', power: 'fa-bolt', door: 'fa-door-open', smoke: 'fa-smog', dehumidifier: 'fa-droplet' }[s.type] || 'fa-circle';
+    const iconClass = { temperature: 'icon-temp', power: 'icon-power', door: 'icon-door', smoke: 'icon-smoke', dehumidifier: 'icon-dehum' }[s.type] || '';
+    let valHtml = '<span style="font-size:.9rem;color:var(--sub)">No data</span>';
+    if (Object.keys(latest).length) {
+      if (s.type === 'temperature')   valHtml = `${(latest.temp_c||0).toFixed(1)}<span style="font-size:.9rem">°C</span> / ${(latest.humidity_pct||0).toFixed(0)}<span style="font-size:.9rem">%RH</span>`;
+      else if (s.type === 'power')    valHtml = `${(latest.power_w||0).toFixed(0)}<span style="font-size:.9rem">W</span>`;
+      else if (s.type === 'door')     valHtml = `<span class="${latest.is_open ? 'status-critical' : 'status-normal'}">${latest.state || '—'}</span>`;
+      else if (s.type === 'smoke')    valHtml = `${(latest.level_pct||0).toFixed(1)}<span style="font-size:.9rem">%</span>`;
+      else if (s.type === 'dehumidifier') valHtml = `<span class="${latest.is_on ? 'status-normal' : 'status-warning'}">${latest.state || '—'}</span>`;
+    }
+    const card = document.createElement('div');
+    card.className = 'sensor-card';
+    card.id = 'ov-' + s.id;
+    card.innerHTML = `
+      <div class="sensor-card-header">
+        <div class="sensor-card-icon ${iconClass}"><i class="fa-solid ${icon}"></i></div>
+        <span class="${statusBadge(status)}">${statusText(status)}</span>
+      </div>
+      <div class="sensor-name">${s.name}</div>
+      <div class="sensor-loc">${s.location} · ${s.zone}</div>
+      <div class="sensor-val">${valHtml}</div>
+      <div class="sensor-time">Updated: ${fmtTs(latest.timestamp)}</div>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('stat-sensors').textContent = state.sensors.length;
+}
+
+function updateOverviewCard(sensorId, sensorType, payload) {
+  const card = document.getElementById('ov-' + sensorId);
+  if (!card) return;
+  const status = payload.status || 'normal';
+  card.querySelector('.' + ['badge-normal','badge-warning','badge-critical'].find(c => card.querySelector('.'+c))).className = statusBadge(status);
+  card.querySelector('.' + ['badge-normal','badge-warning','badge-critical'].find(() => true)).textContent = statusText(status);
+}
+
+// ── Environment ───────────────────────────────────────────────
+async function loadEnvData() {
+  const sel = document.getElementById('env-zone-select');
+  const sensorId = sel.value;
+  if (!sensorId) return;
+
+  // Populate gauges from state
+  const latest = state.latest[sensorId] || {};
+  updateEnvGauges(latest);
+
+  // Load 24h trend
+  const from = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  try {
+    const rows = await EmsApi.readings({ sensor_id: sensorId, from, limit: 300 });
+    const labels = rows.map(r => new Date(r.reading_ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })).reverse();
+    const temps  = rows.map(r => r.value_json?.temp_c ?? null).reverse();
+    const hums   = rows.map(r => r.value_json?.humidity_pct ?? null).reverse();
+
+    if (!charts.env) {
+      charts.env = new Chart(document.getElementById('chart-env').getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets: [
+          { label: 'Temperature (°C)', data: temps, borderColor: '#ef4444', backgroundColor: '#ef444420', tension: .4, pointRadius: 0 },
+          { label: 'Humidity (%)',     data: hums,  borderColor: '#3b82f6', backgroundColor: '#3b82f620', tension: .4, pointRadius: 0 },
+        ]},
+        options: { ...chartDefaults(), plugins: { ...chartDefaults().plugins, title: { display: false } } },
+      });
+    } else {
+      charts.env.data.labels = labels;
+      charts.env.data.datasets[0].data = temps;
+      charts.env.data.datasets[1].data = hums;
+      charts.env.update();
+    }
+  } catch (e) { console.error(e); }
+}
+
+function updateEnvGauges(data) {
+  const temp = parseFloat(data.temp_c) || 0;
+  const hum  = parseFloat(data.humidity_pct) || 0;
+  // Temp gauge: range 10–40°C
+  document.getElementById('gauge-temp-val').textContent = temp.toFixed(1);
+  const tPct = Math.min(Math.max((temp - 10) / 30, 0), 1);
+  document.getElementById('gauge-temp-arc').setAttribute('stroke-dashoffset', String((1 - tPct) * CIRC));
+  const tStatus = temp >= 27 ? 'critical' : temp >= 24 ? 'warning' : 'normal';
+  document.getElementById('gauge-temp-arc').setAttribute('stroke', statusColor(tStatus));
+  const tBadge = document.getElementById('temp-status');
+  tBadge.className = statusBadge(tStatus); tBadge.textContent = statusText(tStatus);
+
+  // Humidity gauge: range 0–100%
+  document.getElementById('gauge-hum-val').textContent = hum.toFixed(0);
+  const hPct = Math.min(hum / 100, 1);
+  document.getElementById('gauge-hum-arc').setAttribute('stroke-dashoffset', String((1 - hPct) * CIRC));
+  const hStatus = hum >= 80 ? 'critical' : hum >= 70 || hum < 35 ? 'warning' : 'normal';
+  document.getElementById('gauge-hum-arc').setAttribute('stroke', statusColor(hStatus));
+  const hBadge = document.getElementById('hum-status');
+  hBadge.className = statusBadge(hStatus); hBadge.textContent = statusText(hStatus);
+}
+
+// ── Power ─────────────────────────────────────────────────────
+async function loadPowerData() {
+  const powerSensor = state.sensors.find(s => s.type === 'power');
+  if (!powerSensor) return;
+  const latest = state.latest[powerSensor.id] || {};
+  updatePowerGauges(latest);
+
+  try {
+    const from = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const rows  = await EmsApi.readings({ sensor_id: powerSensor.id, from, limit: 300 });
+    const labels = rows.map(r => new Date(r.reading_ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })).reverse();
+    const watts  = rows.map(r => r.value_json?.power_w ?? null).reverse();
+
+    if (!charts.power) {
+      charts.power = new Chart(document.getElementById('chart-power').getContext('2d'), {
+        type: 'line',
+        data: { labels, datasets: [{ label: 'Power (W)', data: watts, borderColor: '#8b5cf6', backgroundColor: '#8b5cf620', tension: .4, pointRadius: 0 }] },
+        options: chartDefaults(),
+      });
+    } else {
+      charts.power.data.labels = labels;
+      charts.power.data.datasets[0].data = watts;
+      charts.power.update();
+    }
+  } catch (e) { console.error(e); }
+}
+
+function updatePowerGauges(data) {
+  const v  = parseFloat(data.voltage_v)     || 0;
+  const a  = parseFloat(data.current_a)     || 0;
+  const w  = parseFloat(data.power_w)       || 0;
+  const pf = parseFloat(data.power_factor)  || 0;
+  const kw = parseFloat(data.energy_kwh)    || 0;
+
+  // Voltage 180–270V
+  const vArc = document.getElementById('gauge-volt-arc');
+  if (vArc) {
+    const pct = Math.min(Math.max((v - 180) / 90, 0), 1);
+    vArc.setAttribute('stroke-dashoffset', String((1 - pct) * CIRC));
+    vArc.setAttribute('stroke', v < 200 || v > 260 ? '#ef4444' : v < 210 ? '#f59e0b' : '#2563eb');
+  }
+  const vLbl = document.getElementById('gauge-volt-val');
+  if (vLbl) vLbl.textContent = v.toFixed(0);
+
+  // Current 0–120A
+  const aArc = document.getElementById('gauge-curr-arc');
+  if (aArc) {
+    const pct = Math.min(a / 120, 1);
+    aArc.setAttribute('stroke-dashoffset', String((1 - pct) * CIRC));
+    aArc.setAttribute('stroke', a > 100 ? '#ef4444' : a > 80 ? '#f59e0b' : '#22c55e');
+  }
+  const aLbl = document.getElementById('gauge-curr-val');
+  if (aLbl) aLbl.textContent = a.toFixed(1);
+
+  // Power 0–30000W
+  const wArc = document.getElementById('gauge-pwr-arc');
+  if (wArc) { wArc.setAttribute('stroke-dashoffset', String((1 - Math.min(w / 30000, 1)) * CIRC)); }
+  const wLbl = document.getElementById('gauge-pwr-val');
+  if (wLbl) wLbl.textContent = w >= 1000 ? (w / 1000).toFixed(2) + 'k' : w.toFixed(0);
+
+  // Power Factor 0–1
+  const pfArc = document.getElementById('gauge-pf-arc');
+  if (pfArc) {
+    pfArc.setAttribute('stroke-dashoffset', String((1 - Math.min(pf, 1)) * CIRC));
+    pfArc.setAttribute('stroke', pf < 0.75 ? '#ef4444' : pf < 0.85 ? '#f59e0b' : '#22c55e');
+  }
+  const pfLbl = document.getElementById('gauge-pf-val');
+  if (pfLbl) pfLbl.textContent = pf.toFixed(2);
+  const pfBadge = document.getElementById('pf-status');
+  if (pfBadge) {
+    const s = pf < 0.75 ? 'critical' : pf < 0.85 ? 'warning' : 'normal';
+    pfBadge.className = statusBadge(s); pfBadge.textContent = statusText(s);
+  }
+
+  const eEl = document.getElementById('energy-kwh');
+  if (eEl) eEl.textContent = kw.toFixed(2);
+}
+
+// ── Access ────────────────────────────────────────────────────
+async function loadAccessData() {
+  const doorSensors = state.sensors.filter(s => s.type === 'door');
+  const grid = document.getElementById('door-grid');
+  grid.innerHTML = '';
+  doorSensors.forEach(s => {
+    const tile = document.createElement('div');
+    tile.className = 'door-tile';
+    tile.id = 'door-tile-' + s.id;
+    const lat = state.latest[s.id] || {};
+    const isOpen = lat.is_open;
+    tile.innerHTML = doorTileInner(s, lat);
+    grid.appendChild(tile);
+  });
+
+  try {
+    const rows = await EmsApi.readings({ sensor_type: 'door', limit: 50 });
+    const body = document.getElementById('door-log-body');
+    body.innerHTML = rows.length ? rows.map(r => `
+      <tr>
+        <td>${fmtTs(r.reading_ts)}</td>
+        <td>${r.sensor_name || r.sensor_id}</td>
+        <td>${r.location}</td>
+        <td><span class="${r.value_numeric === 1 ? 'status-critical' : 'status-normal'}">${r.value_json?.state || (r.value_numeric === 1 ? 'Open' : 'Closed')}</span></td>
+      </tr>`).join('') : '<tr><td colspan="4" class="no-data">No door events recorded</td></tr>';
+  } catch (e) {}
+}
+
+function doorTileInner(s, lat) {
+  const isOpen = lat.is_open;
+  return `
+    <div class="door-icon ${isOpen ? 'status-critical' : 'status-normal'}">
+      <i class="fa-solid ${isOpen ? 'fa-door-open' : 'fa-door-closed'}"></i>
+    </div>
+    <div class="door-name">${s.name}</div>
+    <div class="door-state ${isOpen ? 'status-critical' : 'status-normal'}">${isOpen ? 'OPEN' : 'CLOSED'}</div>
+    <div class="door-time">Zone: ${s.zone} · ${s.location}</div>
+    <div class="door-time">Updated: ${fmtTs(lat.timestamp)}</div>`;
+}
+
+function updateDoorTile(sensorId, payload) {
+  const tile = document.getElementById('door-tile-' + sensorId);
+  const s = state.sensors.find(s => s.id === sensorId);
+  if (!tile || !s) return;
+  tile.innerHTML = doorTileInner(s, payload);
+}
+
+// ── Air Quality ───────────────────────────────────────────────
+function renderSmokeGrid() {
+  const grid = document.getElementById('smoke-grid');
+  grid.innerHTML = '';
+  const smokeSensors = state.sensors.filter(s => s.type === 'smoke');
+  smokeSensors.forEach(s => {
+    const lat = state.latest[s.id] || {};
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.id = 'smoke-card-' + s.id;
+    div.innerHTML = smokeCardInner(s, lat);
+    grid.appendChild(div);
+  });
+  if (!smokeSensors.length) grid.innerHTML = '<div class="no-data">No smoke sensors configured</div>';
+}
+
+function smokeCardInner(s, lat) {
+  const level  = parseFloat(lat.level_pct) || 0;
+  const alarm  = lat.alarm;
+  const status = alarm || level >= 50 ? 'critical' : level >= 20 ? 'warning' : 'normal';
+  const pct    = Math.min(level, 100);
+  return `
+    <div class="sensor-card-header">
+      <div class="sensor-card-icon icon-smoke"><i class="fa-solid fa-smog"></i></div>
+      <span class="${statusBadge(status)}">${statusText(status)}</span>
+    </div>
+    <div class="sensor-name">${s.name}</div>
+    <div class="sensor-loc">${s.location} · ${s.zone}</div>
+    <div style="margin:12px 0">
+      <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--sub);margin-bottom:4px">
+        <span>Smoke Level</span><span>${level.toFixed(1)}%</span>
+      </div>
+      <div style="background:var(--border);border-radius:4px;height:8px">
+        <div style="background:${statusColor(status)};width:${pct}%;height:100%;border-radius:4px;transition:width .4s"></div>
+      </div>
+    </div>
+    ${alarm ? '<div class="badge-critical" style="text-align:center"><i class="fa-solid fa-triangle-exclamation"></i> ALARM TRIGGERED</div>' : ''}
+    <div class="sensor-time">Gas: ${lat.gas_type || '—'} · Updated: ${fmtTs(lat.timestamp)}</div>`;
+}
+
+function updateSmokeTile(sensorId, payload) {
+  const card = document.getElementById('smoke-card-' + sensorId);
+  const s = state.sensors.find(s => s.id === sensorId);
+  if (!card || !s) return;
+  card.innerHTML = smokeCardInner(s, payload);
+}
+
+// ── Dehumidifier ──────────────────────────────────────────────
+async function loadDehumData() {
+  const dSensor = state.sensors.find(s => s.type === 'dehumidifier');
+  if (!dSensor) return;
+  const lat = state.latest[dSensor.id] || {};
+  updateDehumState(lat, dSensor.id);
+  document.getElementById('dehum-name').textContent = dSensor.name;
+  document.getElementById('dehum-location').textContent = dSensor.location;
+
+  try {
+    const rows = await EmsApi.readings({ sensor_id: dSensor.id, limit: 50 });
+    const body = document.getElementById('dehum-log-body');
+    body.innerHTML = rows.length ? rows.map(r => `
+      <tr><td>${fmtTs(r.reading_ts)}</td>
+          <td><span class="${r.value_numeric === 1 ? 'status-normal' : 'status-warning'}">${r.value_json?.state || (r.value_numeric === 1 ? 'ON' : 'OFF')}</span></td>
+      </tr>`).join('') : '<tr><td colspan="2" class="no-data">No dehumidifier events</td></tr>';
+  } catch (e) {}
+}
+
+function updateDehumState(data, sensorId) {
+  const el  = document.getElementById('dehum-state');
+  const lbl = document.getElementById('dehum-state-lbl');
+  if (!el || !lbl) return;
+  const isOn = data.is_on || data.state === 'on';
+  el.className = 'dehum-state ' + (isOn ? 'dehum-on' : 'dehum-off');
+  lbl.textContent = isOn ? 'ON' : 'OFF';
+  const tEl = document.getElementById('dehum-last');
+  if (tEl) tEl.textContent = 'Last update: ' + fmtTs(data.timestamp);
+}
+
+// ── Alerts ────────────────────────────────────────────────────
+async function loadActiveAlerts() {
+  try {
+    const alerts = await EmsApi.activeAlerts();
+    state.activeAlerts = alerts;
+    const badge = document.getElementById('alert-badge');
+    badge.style.display = alerts.length ? '' : 'none';
+    badge.textContent = alerts.length;
+    document.getElementById('stat-alerts').textContent   = alerts.length;
+    document.getElementById('stat-critical').textContent = alerts.filter(a => a.severity === 'critical').length;
+
+    const list = document.getElementById('active-alerts-list');
+    if (!alerts.length) { list.innerHTML = '<div class="no-data">No active alerts</div>'; return; }
+    list.innerHTML = alerts.map(a => `
+      <div class="alert-item ${a.severity}">
+        <i class="fa-solid fa-triangle-exclamation" style="color:${a.severity === 'critical' ? 'var(--critical)' : 'var(--warning)'}"></i>
+        <div style="flex:1">
+          <div class="alert-msg">${a.message}</div>
+          <div class="alert-time">${a.sensor_name || a.sensor_id} · ${fmtTs(a.triggered_at)}</div>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="ackAlert(${a.id})">Ack</button>
+      </div>`).join('');
+  } catch (e) {}
+}
+
+async function ackAlert(id) {
+  try { await EmsApi.acknowledge(id); toast('Alert acknowledged'); loadActiveAlerts(); loadAlertHistory(); } catch (e) { toast(e.message); }
+}
+
+async function loadAlertHistory() {
+  const severity = document.getElementById('alert-hist-severity')?.value || '';
+  try {
+    const rows = await EmsApi.alertHistory({ limit: 50, ...(severity ? { severity } : {}) });
+    const body = document.getElementById('alert-hist-body');
+    body.innerHTML = rows.length ? rows.map(r => `
+      <tr>
+        <td>${fmtTs(r.triggered_at)}</td>
+        <td>${r.sensor_name || r.sensor_id}</td>
+        <td><span class="${statusBadge(r.severity)}">${r.severity}</span></td>
+        <td style="max-width:280px;white-space:normal">${r.message}</td>
+        <td>${r.acknowledged_by || '<span style="color:var(--sub)">—</span>'}</td>
+      </tr>`).join('') : '<tr><td colspan="5" class="no-data">No alerts</td></tr>';
+  } catch (e) {}
+}
+
+async function loadAlertRules() {
+  try {
+    const rows = await EmsApi.alertRules();
+    const body = document.getElementById('rules-body');
+    body.innerHTML = rows.length ? rows.map(r => `
+      <tr>
+        <td>${r.sensor_name || r.sensor_id}</td>
+        <td>${r.metric}</td>
+        <td>${r.operator} ${r.threshold}</td>
+        <td><span class="${statusBadge(r.severity)}">${r.severity}</span></td>
+        <td>${r.cooldown_minutes} min</td>
+        <td>${r.enabled ? '✓' : '—'}</td>
+        <td>
+          <button class="btn btn-outline btn-sm" onclick="toggleRule(${r.id},${!r.enabled})">${r.enabled ? 'Disable' : 'Enable'}</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRule(${r.id})"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="7" class="no-data">No alert rules</td></tr>';
+  } catch (e) {}
+}
+
+async function toggleRule(id, enabled) {
+  try { await EmsApi.updateRule(id, { enabled }); toast(enabled ? 'Rule enabled' : 'Rule disabled'); loadAlertRules(); } catch (e) { toast(e.message); }
+}
+async function deleteRule(id) {
+  if (!confirm('Delete this alert rule?')) return;
+  try { await EmsApi.deleteRule(id); toast('Rule deleted'); loadAlertRules(); } catch (e) { toast(e.message); }
+}
+
+// ── Reports ───────────────────────────────────────────────────
+function downloadCsv() {
+  const from = document.getElementById('rpt-from').value;
+  const to   = document.getElementById('rpt-to').value;
+  const type = document.getElementById('rpt-type').value;
+  const p = {};
+  if (from) p.from = new Date(from).toISOString();
+  if (to)   p.to   = new Date(to).toISOString();
+  if (type) p.sensor_type = type;
+  window.open(EmsApi.csvUrl(p), '_blank');
+}
+
+function downloadAlertsCsv() {
+  const from = document.getElementById('alt-from').value;
+  const to   = document.getElementById('alt-to').value;
+  const p = {};
+  if (from) p.from = new Date(from).toISOString();
+  if (to)   p.to   = new Date(to).toISOString();
+  window.open(EmsApi.alertsCsvUrl(p), '_blank');
+}
+
+async function generatePdf() {
+  const from = document.getElementById('pdf-from').value;
+  const to   = document.getElementById('pdf-to').value;
+  const p = {};
+  if (from) p.from = new Date(from).toISOString();
+  if (to)   p.to   = new Date(to).toISOString();
+
+  toast('Generating PDF…', 5000);
+  try {
+    const data = await EmsApi.reportSummary(p);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const pageW = doc.internal.pageSize.getWidth();
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('Bank Server Room — EMS Report', pageW / 2, 18, { align: 'center' });
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(100);
+    doc.text(`Period: ${data.period.from.slice(0,10)} to ${data.period.to.slice(0,10)}`, pageW / 2, 25, { align: 'center' });
+    doc.text(`Generated: ${new Date(data.generated_at).toLocaleString()}`, pageW / 2, 31, { align: 'center' });
+    doc.setTextColor(0);
+
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Sensor Readings Summary', 14, 42);
+
+    doc.autoTable({
+      startY: 46,
+      head: [['Sensor', 'Type', 'Location', 'Min', 'Max', 'Avg', 'Readings']],
+      body: data.readings_summary.map(r => [r.name, r.sensor_type, r.location, r.min_val, r.max_val, r.avg_val, r.reading_count]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [37, 99, 235] },
+    });
+
+    let y = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Alert Summary', 14, y);
+    doc.autoTable({
+      startY: y + 4,
+      head: [['Severity', 'Count']],
+      body: data.alerts_summary.map(r => [r.severity, r.count]),
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [239, 68, 68] },
+    });
+
+    doc.save(`EMS_Report_${(p.from || 'all').slice(0,10)}.pdf`);
+    toast('PDF downloaded');
+  } catch (e) { toast('PDF error: ' + e.message); }
+}
+
+// ── Admin ─────────────────────────────────────────────────────
+async function loadUsers() {
+  try {
+    const rows = await EmsApi.users();
+    const body = document.getElementById('users-body');
+    body.innerHTML = rows.length ? rows.map(r => `
+      <tr>
+        <td>${r.username}</td><td>${r.full_name}</td><td>${r.email}</td>
+        <td><span class="${statusBadge(r.role === 'admin' ? 'critical' : r.role === 'operator' ? 'warning' : 'normal')}">${r.role}</span></td>
+        <td>${r.department}</td>
+        <td>${r.last_login ? fmtTs(r.last_login) : '—'}</td>
+        <td>
+          ${r.email !== USER.email ? `<button class="btn btn-danger btn-sm" onclick="deleteUser('${r.email}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+        </td>
+      </tr>`).join('') : '<tr><td colspan="7" class="no-data">No users</td></tr>';
+  } catch (e) {}
+}
+
+async function deleteUser(email) {
+  if (!confirm(`Delete user ${email}?`)) return;
+  try { await EmsApi.deleteUser(email); toast('User deleted'); loadUsers(); } catch (e) { toast(e.message); }
+}
+
+async function loadAdminSensors() {
+  try {
+    const rows = await EmsApi.sensors();
+    const body = document.getElementById('sensors-body');
+    body.innerHTML = rows.length ? rows.map(s => `
+      <tr>
+        <td><code style="font-size:.75rem">${s.id}</code></td>
+        <td><span class="badge-normal">${s.type}</span></td>
+        <td>${s.name}</td><td>${s.location}</td><td>${s.zone}</td>
+        <td><code style="font-size:.7rem">${s.mqtt_topic}</code></td>
+        <td>${s.enabled ? '✓' : '<span style="color:var(--sub)">Off</span>'}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="deleteSensor('${s.id}')"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      </tr>`).join('') : '<tr><td colspan="8" class="no-data">No sensors</td></tr>';
+  } catch (e) {}
+}
+
+async function deleteSensor(id) {
+  if (!confirm(`Delete sensor ${id}? This also deletes all readings.`)) return;
+  try { await EmsApi.deleteSensor(id); toast('Sensor deleted'); loadAdminSensors(); loadSensors(); } catch (e) { toast(e.message); }
+}
+
+async function applyRetention() {
+  const days = parseInt(document.getElementById('retention-days').value);
+  if (isNaN(days) || days < 7) { toast('Enter a valid number of days (min 7)'); return; }
+  try {
+    await EmsApi.saveSetting('general', { dataRetentionDays: days });
+    const r = await EmsApi.applyRetention();
+    toast(`Deleted ${r.deleted} old readings`);
+  } catch (e) { toast(e.message); }
+}
+
+// ── Modals ────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); }));
+
+function openUserModal()   { openModal('modal-user'); }
+function openSensorModal() { openModal('modal-sensor'); }
+function openRuleModal() {
+  // Populate sensor dropdown
+  const sel = document.getElementById('mr-sensor');
+  sel.innerHTML = state.sensors.map(s => `<option value="${s.id}">${s.name} (${s.type})</option>`).join('');
+  openModal('modal-rule');
+}
+
+async function createUser() {
+  const body = {
+    full_name:  document.getElementById('mu-name').value,
+    email:      document.getElementById('mu-email').value,
+    username:   document.getElementById('mu-uname').value,
+    password:   document.getElementById('mu-pass').value,
+    role:       document.getElementById('mu-role').value,
+    department: document.getElementById('mu-dept').value,
+  };
+  try { await EmsApi.createUser(body); toast('User created'); closeModal('modal-user'); loadUsers(); } catch (e) { toast(e.message); }
+}
+
+async function createSensor() {
+  const body = {
+    id:         document.getElementById('ms-id').value.trim(),
+    type:       document.getElementById('ms-type').value,
+    name:       document.getElementById('ms-name').value,
+    location:   document.getElementById('ms-loc').value,
+    zone:       document.getElementById('ms-zone').value,
+    mqtt_topic: document.getElementById('ms-topic').value.trim(),
+  };
+  try { await EmsApi.createSensor(body); toast('Sensor registered'); closeModal('modal-sensor'); loadAdminSensors(); loadSensors(); } catch (e) { toast(e.message); }
+}
+
+async function createRule() {
+  const body = {
+    sensor_id:       document.getElementById('mr-sensor').value,
+    metric:          document.getElementById('mr-metric').value.trim(),
+    operator:        document.getElementById('mr-op').value,
+    threshold:       parseFloat(document.getElementById('mr-thresh').value),
+    severity:        document.getElementById('mr-sev').value,
+    cooldown_minutes: parseInt(document.getElementById('mr-cooldown').value),
+  };
+  try { await EmsApi.createRule(body); toast('Rule created'); closeModal('modal-rule'); loadAlertRules(); } catch (e) { toast(e.message); }
+}
+
+// ── Initial data load ─────────────────────────────────────────
+async function loadSensors() {
+  try {
+    state.sensors = await EmsApi.sensors();
+
+    // Populate env zone selector
+    const sel = document.getElementById('env-zone-select');
+    const tempSensors = state.sensors.filter(s => s.type === 'temperature');
+    sel.innerHTML = tempSensors.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+    // Load latest readings into state
+    const latest = await EmsApi.latestReadings();
+    latest.forEach(r => { state.latest[r.sensor_id] = { ...r.value_json, sensor_id: r.sensor_id, sensor_type: r.sensor_type, timestamp: r.reading_ts }; });
+
+    renderOverview();
+    await loadActiveAlerts();
+  } catch (e) { console.error('loadSensors:', e); }
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────
+(async () => {
+  await loadSensors();
+  connectWs();
+
+  // Set default report date range to last 24 hours
+  const now  = new Date();
+  const past = new Date(Date.now() - 24 * 3600 * 1000);
+  function toLocal(d) { return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); }
+  ['rpt-from','pdf-from','alt-from'].forEach(id => { const el = document.getElementById(id); if (el) el.value = toLocal(past); });
+  ['rpt-to',  'pdf-to',  'alt-to' ].forEach(id => { const el = document.getElementById(id); if (el) el.value = toLocal(now);  });
+
+  // Auto-refresh active alerts every 30 seconds
+  setInterval(loadActiveAlerts, 30000);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EMS Login — Bank Server Room</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --bg:       #f0f4f8;
+      --card:     #ffffff;
+      --border:   #e2e8f0;
+      --text:     #1e293b;
+      --sub:      #64748b;
+      --primary:  #2563eb;
+      --prim-hov: #1d4ed8;
+      --input-bg: #f8fafc;
+      --shadow:   0 4px 24px rgba(0,0,0,.08);
+    }
+    [data-theme="dark"] {
+      --bg:       #0f172a;
+      --card:     #1e293b;
+      --border:   #334155;
+      --text:     #f1f5f9;
+      --sub:      #94a3b8;
+      --input-bg: #0f172a;
+      --shadow:   0 4px 24px rgba(0,0,0,.4);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
+    .login-wrap{width:100%;max-width:420px;padding:16px}
+    .login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;box-shadow:var(--shadow)}
+    .brand{text-align:center;margin-bottom:28px}
+    .brand-icon{width:64px;height:64px;background:var(--primary);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
+    .brand h1{font-size:1.4rem;font-weight:700;margin-bottom:4px}
+    .brand p{font-size:.8rem;color:var(--sub)}
+    .form-group{margin-bottom:16px}
+    label{display:block;font-size:.8rem;font-weight:500;margin-bottom:6px;color:var(--sub)}
+    input{width:100%;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Poppins',sans-serif;font-size:.9rem;outline:none;transition:border .2s}
+    input:focus{border-color:var(--primary)}
+    .btn{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:background .2s;margin-top:8px}
+    .btn:hover{background:var(--prim-hov)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .error-msg{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:12px;display:none}
+    .history-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+    .hist-chip{padding:4px 10px;background:var(--input-bg);border:1px solid var(--border);border-radius:20px;font-size:.75rem;cursor:pointer;transition:all .2s}
+    .hist-chip:hover{border-color:var(--primary);color:var(--primary)}
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--sub);font-size:.78rem}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .setup-link{text-align:center;font-size:.8rem;color:var(--sub);margin-top:16px}
+    .setup-link a{color:var(--primary);text-decoration:none}
+    .theme-toggle{position:fixed;top:16px;right:16px;width:36px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+
+    /* setup panel */
+    .setup-panel{display:none}
+    .back-link{color:var(--primary);cursor:pointer;font-size:.82rem;margin-bottom:12px;display:inline-block}
+  </style>
+</head>
+<body>
+  <div class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+    <i class="fa-solid fa-circle-half-stroke"></i>
+  </div>
+
+  <div class="login-wrap">
+    <div class="login-card">
+
+      <!-- LOGIN PANEL -->
+      <div id="login-panel">
+        <div class="brand">
+          <div class="brand-icon"><i class="fa-solid fa-server"></i></div>
+          <h1>EMS Dashboard</h1>
+          <p>Bank Server Room — Environmental Monitoring</p>
+        </div>
+
+        <div id="error-msg" class="error-msg"></div>
+
+        <div class="form-group">
+          <label>Username or Email</label>
+          <input id="identifier" type="text" placeholder="Enter username or email" autocomplete="username"/>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Enter password" autocomplete="current-password"/>
+        </div>
+
+        <button class="btn" id="login-btn" onclick="doLogin()">
+          <i class="fa-solid fa-right-to-bracket"></i>&nbsp; Sign In
+        </button>
+
+        <div id="history-section" style="margin-top:18px;display:none">
+          <div class="divider">Recent logins</div>
+          <div class="history-list" id="history-list"></div>
+        </div>
+
+        <div class="setup-link">
+          First time? <a href="#" onclick="showSetup()">Create admin account</a>
+        </div>
+      </div>
+
+      <!-- SETUP PANEL -->
+      <div id="setup-panel" class="setup-panel">
+        <div class="brand">
+          <div class="brand-icon" style="background:#10b981"><i class="fa-solid fa-user-shield"></i></div>
+          <h1>Initial Setup</h1>
+          <p>Create the first administrator account</p>
+        </div>
+
+        <span class="back-link" onclick="showLogin()">&#8592; Back to login</span>
+
+        <div id="setup-error" class="error-msg"></div>
+
+        <div class="form-group"><label>Full Name</label><input id="s-name" type="text" placeholder="e.g. John Doe"/></div>
+        <div class="form-group"><label>Email</label><input id="s-email" type="email" placeholder="admin@bank.local"/></div>
+        <div class="form-group"><label>Username</label><input id="s-username" type="text" placeholder="admin"/></div>
+        <div class="form-group"><label>Password</label><input id="s-password" type="password" placeholder="Min 8 characters"/></div>
+
+        <button class="btn" onclick="doSetup()">
+          <i class="fa-solid fa-check"></i>&nbsp; Create Admin Account
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/app-api.js"></script>
+  <script>
+    // Theme
+    const savedTheme = localStorage.getItem('ems_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    function toggleTheme() {
+      const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+      localStorage.setItem('ems_theme', t);
+    }
+
+    // Redirect if already logged in
+    if (EmsApi.isLoggedIn()) window.location.href = '/dashboard.html';
+
+    // Load recent logins
+    EmsApi.loginHistory().then(hist => {
+      if (!hist || !hist.length) return;
+      const sec = document.getElementById('history-section');
+      const list = document.getElementById('history-list');
+      sec.style.display = 'block';
+      hist.forEach(id => {
+        const chip = document.createElement('span');
+        chip.className = 'hist-chip';
+        chip.textContent = id;
+        chip.onclick = () => { document.getElementById('identifier').value = id; document.getElementById('password').focus(); };
+        list.appendChild(chip);
+      });
+    }).catch(() => {});
+
+    function showError(id, msg) {
+      const el = document.getElementById(id);
+      el.textContent = msg; el.style.display = 'block';
+    }
+    function hideError(id) { document.getElementById(id).style.display = 'none'; }
+
+    async function doLogin() {
+      hideError('error-msg');
+      const id = document.getElementById('identifier').value.trim();
+      const pw = document.getElementById('password').value;
+      if (!id || !pw) { showError('error-msg', 'Please enter username/email and password.'); return; }
+      const btn = document.getElementById('login-btn');
+      btn.disabled = true; btn.textContent = 'Signing in…';
+      try {
+        const res = await EmsApi.login(id, pw);
+        EmsApi.setSession(res.token, res.user);
+        window.location.href = '/dashboard.html';
+      } catch (err) {
+        showError('error-msg', err.message || 'Login failed');
+        btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i>&nbsp; Sign In';
+      }
+    }
+
+    async function doSetup() {
+      hideError('setup-error');
+      const body = {
+        full_name: document.getElementById('s-name').value.trim(),
+        email:     document.getElementById('s-email').value.trim(),
+        username:  document.getElementById('s-username').value.trim(),
+        password:  document.getElementById('s-password').value,
+      };
+      if (!body.email || !body.username || !body.password)
+        { showError('setup-error', 'All fields are required.'); return; }
+      try {
+        const res = await EmsApi.setup(body);
+        EmsApi.setSession(res.token, res.user);
+        window.location.href = '/dashboard.html';
+      } catch (err) { showError('setup-error', err.message || 'Setup failed'); }
+    }
+
+    function showSetup() {
+      document.getElementById('login-panel').style.display = 'none';
+      document.getElementById('setup-panel').style.display = 'block';
+    }
+    function showLogin() {
+      document.getElementById('setup-panel').style.display = 'none';
+      document.getElementById('login-panel').style.display = 'block';
+    }
+
+    // Enter key triggers login
+    ['identifier','password'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+    });
+  </script>
+</body>
+</html>

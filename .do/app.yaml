@@ -1,0 +1,48 @@
+name: bank-server-room-ems
+region: fra
+
+services:
+  - name: web
+    run_command: node server/index.js
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb   # $5 / month
+
+    github:
+      branch: main
+      deploy_on_push: true
+      # repo: your-github-username/ems-dashboard  ← fill this in
+
+    http_port: 3001
+
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 10
+      period_seconds: 30
+
+    envs:
+      - key: NODE_ENV
+        value: production
+        scope: RUN_TIME
+
+      - key: DATABASE_URL
+        value: "postgresql://postgres.xsspapyywsejiplmqthr@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"
+        scope: RUN_TIME
+
+      - key: DATABASE_PASSWORD
+        value: ""          # ← paste real value in App Platform dashboard (mark as Secret)
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: JWT_SECRET
+        value: ""          # ← paste a long random string in App Platform dashboard (mark as Secret)
+        scope: RUN_TIME
+        type: SECRET
+
+      - key: ENABLE_SIMULATOR
+        value: "true"
+        scope: RUN_TIME
+
+      - key: MQTT_BROKER
+        value: ""          # leave blank — no MQTT broker in cloud deployment
+        scope: RUN_TIME

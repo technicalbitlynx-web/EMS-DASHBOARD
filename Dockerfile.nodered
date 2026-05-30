@@ -1,0 +1,12 @@
+FROM nodered/node-red:latest
+
+# Install pg so settings.js and function nodes can access it via global context.
+# NODE_PATH lets settings.js (loaded from /data/) find modules installed under Node-RED.
+USER root
+RUN npm install --prefix /usr/src/node-red pg
+ENV NODE_PATH=/usr/src/node-red/node_modules
+USER node-red
+
+EXPOSE 1880
+
+CMD ["npm", "start", "--prefix", "/usr/src/node-red"]
