@@ -9,9 +9,9 @@ services:
     instance_size_slug: apps-s-1vcpu-0.5gb   # $5 / month
 
     github:
-      branch: main
+      repo: technicalbitlynx-web/EMS-DASHBOARD
+      branch: master
       deploy_on_push: true
-      # repo: your-github-username/ems-dashboard  ← fill this in
 
     http_port: 3001
 
