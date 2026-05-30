@@ -26,11 +26,11 @@ services:
         scope: RUN_TIME
 
       - key: DATABASE_URL
-        value: "postgresql://postgres.xsspapyywsejiplmqthr@aws-1-eu-central-1.pooler.supabase.com:6543/postgres"
+        value: ""          # ← paste your Supabase pooler connection string (without password)
         scope: RUN_TIME
 
       - key: DATABASE_PASSWORD
-        value: ""          # ← paste real value in App Platform dashboard (mark as Secret)
+        value: ""          # ← paste your Supabase database password (mark as Secret)
         scope: RUN_TIME
         type: SECRET
 
