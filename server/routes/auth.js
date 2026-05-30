@@ -24,7 +24,7 @@ router.post('/login', async (req, res, next) => {
       return res.status(400).json({ error: 'Identifier and password required' });
 
     const { rows } = await pool.query(
-      'SELECT * FROM users WHERE email = $1 OR username = $1',
+      'SELECT * FROM users WHERE email = $1 OR LOWER(username) = $1',
       [identifier]
     );
     const user = rows[0];

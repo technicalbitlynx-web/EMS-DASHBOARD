@@ -22,8 +22,12 @@ window.EmsApi = (function () {
     if (body !== undefined) opts.body = JSON.stringify(body);
     const res  = await fetch(path, opts);
     const data = await res.json().catch(() => ({}));
-    if (res.status === 401) { clearSession(); window.location.href = '/'; return; }
-    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+    if (!res.ok) {
+      // 401 on an authenticated request means the session expired — redirect.
+      // 401 on the login/setup endpoints means bad credentials — throw normally.
+      if (res.status === 401 && getToken()) { clearSession(); window.location.href = '/'; return; }
+      throw new Error(data.error || `HTTP ${res.status}`);
+    }
     return data;
   }
 
