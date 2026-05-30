@@ -1,35 +1,10 @@
-const path    = require('path');
-const http    = require('http');
-const express = require('express');
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
+'use strict';
+const http = require('http');
+const path = require('path');
+const fs   = require('fs');
+const app  = require('./app');
 
 const PORT = Number(process.env.PORT || 3001);
-
-const app = express();
-app.use(express.json({ limit: '5mb' }));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
-
-// ── API routes ───────────────────────────────────────────────────
-app.use('/api/auth',     require('./routes/auth'));
-app.use('/api/sensors',  require('./routes/sensors'));
-app.use('/api/readings', require('./routes/readings'));
-app.use('/api/alerts',   require('./routes/alerts'));
-app.use('/api/reports',  require('./routes/reports'));
-app.use('/api/settings', require('./routes/settings'));
-
-app.get('/api/health', (req, res) => res.json({ ok: true, ts: new Date().toISOString() }));
-
-// SPA catch-all: serve index.html for any non-API path
-app.get(/^(?!\/api).*$/, (req, res) => {
-  res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-});
-
-// Error handler
-app.use((err, req, res, _next) => {
-  console.error('[Server]', err.message);
-  res.status(500).json({ error: 'Internal server error' });
-});
 
 // ── HTTP + WebSocket server ──────────────────────────────────────
 const httpServer = http.createServer(app);
@@ -38,8 +13,6 @@ const { initWsServer } = require('./ws/broadcaster');
 initWsServer(httpServer);
 
 const { initMqttClient } = require('./mqtt/client');
-
-const fs   = require('fs');
 const pool = require('./db');
 
 async function waitForDb(retries = 10) {
