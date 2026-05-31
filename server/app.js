@@ -30,18 +30,18 @@ app.get('/manifest.json', (req, res) => {
   res.setHeader('Content-Type', 'application/manifest+json');
   res.setHeader('Cache-Control', 'no-cache');
   res.json({
-    id: 'com.ems.dashboard',
-    name: 'Bank Server Room EMS',
-    short_name: 'EMS',
-    description: 'Environmental Monitoring System — Bank Server Room',
-    categories: ['business'],
-    dir: 'ltr',
-    start_url: '/',
-    scope: '/',
-    display: 'standalone',
-    orientation: 'any',
+    id:               'com.ems.dashboard',
+    name:             'Bank Server Room EMS',
+    short_name:       'EMS',
+    description:      'Environmental Monitoring System — Bank Server Room',
+    categories:       ['business'],
+    dir:              'ltr',
+    start_url:        '/',
+    scope:            '/',
+    display:          'standalone',
+    orientation:      'any',
     background_color: '#0f172a',
-    theme_color: '#2563eb',
+    theme_color:      '#2563eb',
     icons: [
       { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
