@@ -8,38 +8,58 @@ const app  = express();
 const pool = require('./db');
 
 // ── Lazy schema init ─────────────────────────────────────────────
-// Runs once per process on the first API request.
-// Uses IF NOT EXISTS / ON CONFLICT so it is fully idempotent.
 let _schemaPromise = null;
 function ensureSchema() {
   if (!_schemaPromise) {
     const sql = fs.readFileSync(path.join(__dirname, 'db', 'schema.sql'), 'utf8');
     _schemaPromise = pool.query(sql)
       .then(() => console.log('[App] Schema ready'))
-      .catch(err => {
-        console.error('[App] Schema init error:', err.message);
-        _schemaPromise = null; // allow retry on next request
-      });
+      .catch(err => { console.error('[App] Schema init error:', err.message); _schemaPromise = null; });
   }
   return _schemaPromise;
 }
 
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..', 'public')));
 
-// Serve PWA files with correct Content-Type headers
+// ── PWA routes (before express.static) ──────────────────────────
+
+// Manifest served inline — guaranteed regardless of file bundling,
+// and with the correct Content-Type that PWA Builder requires.
 app.get('/manifest.json', (req, res) => {
   res.setHeader('Content-Type', 'application/manifest+json');
-  res.sendFile(path.join(__dirname, '..', 'public', 'manifest.json'));
+  res.setHeader('Cache-Control', 'no-cache');
+  res.json({
+    id: 'com.ems.dashboard',
+    name: 'Bank Server Room EMS',
+    short_name: 'EMS',
+    description: 'Environmental Monitoring System — Bank Server Room',
+    categories: ['business'],
+    dir: 'ltr',
+    start_url: '/',
+    scope: '/',
+    display: 'standalone',
+    orientation: 'any',
+    background_color: '#0f172a',
+    theme_color: '#2563eb',
+    icons: [
+      { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+      { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+    ]
+  });
 });
+
+// Service worker
 app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Service-Worker-Allowed', '/');
   res.sendFile(path.join(__dirname, '..', 'public', 'sw.js'));
 });
 
-// Run schema init before every API call (no-op after first success)
+// ── Static assets (JS, CSS, images, icons) ───────────────────────
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// ── Run schema init before every API call ────────────────────────
 app.use('/api', (req, res, next) => {
   ensureSchema().then(() => next()).catch(() => next());
 });
@@ -52,7 +72,6 @@ app.use('/api/alerts',   require('./routes/alerts'));
 app.use('/api/reports',  require('./routes/reports'));
 app.use('/api/settings', require('./routes/settings'));
 
-// Enhanced health check — verifies DB connectivity
 app.get('/api/health', async (req, res) => {
   try {
     await pool.query('SELECT 1');
@@ -62,8 +81,10 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// SPA catch-all: serve index.html for any non-API, non-file path
+// ── SPA catch-all ────────────────────────────────────────────────
+// no-store so Vercel CDN never caches a stale HTML page
 app.get(/^(?!\/api).*$/, (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
