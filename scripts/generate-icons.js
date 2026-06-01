@@ -31,10 +31,10 @@ function pixel(x, y, W, H) {
   const px = x / W;   // 0..1
   const py = y / H;
 
-  const BG   = [37, 99, 235];    // #2563eb brand blue
+  const BG   = [15, 138, 80];    // #0f8a50 EMS green
   const BODY = [255, 255, 255];  // white server rack body
-  const DIV  = [147, 197, 253];  // blue-200 divider lines
-  const LED  = [74, 222, 128];   // green-400 LED dot
+  const DIV  = [167, 224, 192];  // soft green divider lines
+  const LED  = [52, 192, 125];   // #34c07d green LED dot
 
   // Server rack body: 18–82% wide, 25–75% tall
   if (px >= 0.18 && px <= 0.82 && py >= 0.25 && py <= 0.75) {
