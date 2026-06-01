@@ -14,5 +14,8 @@
   ],
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index.js" }
+  ],
+  "crons": [
+    { "path": "/api/cron/dispatch-alerts", "schedule": "* * * * *" }
   ]
 }

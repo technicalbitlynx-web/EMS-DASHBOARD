@@ -71,6 +71,8 @@ app.use('/api/readings', require('./routes/readings'));
 app.use('/api/alerts',   require('./routes/alerts'));
 app.use('/api/reports',  require('./routes/reports'));
 app.use('/api/settings', require('./routes/settings'));
+app.use('/api/devices',  require('./routes/devices'));
+app.use('/api/cron',     require('./routes/cron'));
 
 app.get('/api/health', async (req, res) => {
   try {

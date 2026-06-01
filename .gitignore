@@ -5,3 +5,11 @@ mosquitto/data/
 mosquitto/log/
 node-red/flows_cred.json
 *.log
+
+# Local-only Docker port override (machine-specific)
+docker-compose.override.yml
+
+# Flutter build artifacts
+mobile/build/
+mobile/.dart_tool/
+mobile/android/app/google-services.json

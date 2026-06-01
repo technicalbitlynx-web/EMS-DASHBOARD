@@ -128,3 +128,17 @@ INSERT INTO alert_rules (sensor_id, metric, operator, threshold, severity, coold
   ('smoke_sensor1', 'level_pct',    '>',  20,   'warning',  5),
   ('smoke_sensor1', 'level_pct',    '>',  50,   'critical', 1)
 ON CONFLICT DO NOTHING;
+
+-- ── Push notifications (mobile app) ──────────────────────────────
+-- Registered device tokens for Firebase Cloud Messaging. Additive only.
+CREATE TABLE IF NOT EXISTS device_tokens (
+  token       TEXT PRIMARY KEY,
+  user_email  TEXT REFERENCES users(email) ON DELETE CASCADE,
+  platform    TEXT NOT NULL DEFAULT 'android',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- Track which alerts have already been pushed (prevents double-send).
+ALTER TABLE alert_history ADD COLUMN IF NOT EXISTS pushed_at TIMESTAMPTZ;
+CREATE INDEX IF NOT EXISTS idx_ah_unpushed
+  ON alert_history (triggered_at) WHERE pushed_at IS NULL;
