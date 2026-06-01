@@ -5,64 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>EMS Login — Bank Server Room</title>
   <link rel="manifest" href="/manifest.json"/>
-  <meta name="theme-color" content="#2563eb"/>
+  <meta name="theme-color" content="#0f8a50"/>
   <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="EMS"/>
   <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
+    /* ── Bitlynx EMS — Green design system (login) ─────────── */
     :root {
-      --bg:       #f0f4f8;
+      --bg:       #f3f7f4;
       --card:     #ffffff;
-      --border:   #e2e8f0;
-      --text:     #1e293b;
-      --sub:      #64748b;
-      --primary:  #2563eb;
-      --prim-hov: #1d4ed8;
-      --input-bg: #f8fafc;
-      --shadow:   0 4px 24px rgba(0,0,0,.08);
+      --border:   #dde7e0;
+      --text:     #14201a;
+      --sub:      #586b60;
+      --primary:  #0f8a50;
+      --prim-hov: #0b6f40;
+      --input-bg: #eaf0ec;
+      --shadow:   0 4px 16px rgba(10,19,14,.10);
+      --ring:     0 0 0 3px rgba(15,138,80,.20);
+      --font-sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     }
     [data-theme="dark"] {
-      --bg:       #0f172a;
-      --card:     #1e293b;
-      --border:   #334155;
-      --text:     #f1f5f9;
-      --sub:      #94a3b8;
-      --input-bg: #0f172a;
-      --shadow:   0 4px 24px rgba(0,0,0,.4);
+      --bg:       #0a130e;
+      --card:     #111b15;
+      --border:   #243a2c;
+      --text:     #e6f0ea;
+      --sub:      #95a89d;
+      --primary:  #34c07d;
+      --prim-hov: #4fce92;
+      --input-bg: #0c140f;
+      --shadow:   0 16px 48px rgba(0,0,0,.55);
+      --ring:     0 0 0 3px rgba(52,192,125,.30);
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s}
-    .login-wrap{width:100%;max-width:420px;padding:16px}
-    .login-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;box-shadow:var(--shadow)}
-    .brand{text-align:center;margin-bottom:28px}
-    .brand-icon{width:64px;height:64px;background:var(--primary);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:28px;color:#fff}
-    .brand h1{font-size:1.4rem;font-weight:700;margin-bottom:4px}
-    .brand p{font-size:.8rem;color:var(--sub)}
-    .form-group{margin-bottom:16px}
-    label{display:block;font-size:.8rem;font-weight:500;margin-bottom:6px;color:var(--sub)}
-    input{width:100%;padding:10px 14px;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Poppins',sans-serif;font-size:.9rem;outline:none;transition:border .2s}
-    input:focus{border-color:var(--primary)}
-    .btn{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:600;font-family:'Poppins',sans-serif;cursor:pointer;transition:background .2s;margin-top:8px}
+    body{font-family:var(--font-sans);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;transition:background .2s,color .2s;-webkit-font-smoothing:antialiased}
+    .login-wrap{width:100%;max-width:392px;padding:16px}
+    .login-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:36px 32px;box-shadow:var(--shadow)}
+    .brand{text-align:center;margin-bottom:26px}
+    .brand-icon{width:56px;height:56px;background:var(--primary);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:24px;color:#fff}
+    .brand h1{font-size:1.5rem;font-weight:700;letter-spacing:-.01em;margin-bottom:4px}
+    .brand p{font-size:.8125rem;color:var(--sub)}
+    .form-group{margin-bottom:14px}
+    label{display:block;font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:6px;color:var(--sub)}
+    input{width:100%;padding:9px 12px;background:var(--input-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--font-sans);font-size:.875rem;outline:none;transition:border .15s,box-shadow .15s}
+    input:focus{border-color:var(--primary);box-shadow:var(--ring);background:var(--card)}
+    .btn{width:100%;padding:11px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:600;font-family:var(--font-sans);cursor:pointer;transition:background .15s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:7px}
     .btn:hover{background:var(--prim-hov)}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .error-msg{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:12px;display:none}
-    .history-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
-    .hist-chip{padding:4px 10px;background:var(--input-bg);border:1px solid var(--border);border-radius:20px;font-size:.75rem;cursor:pointer;transition:all .2s}
+    .error-msg{background:#fbe4e4;border:1px solid #f0b4b4;color:#b3261e;padding:10px 14px;border-radius:8px;font-size:.82rem;margin-bottom:12px;display:none}
+    [data-theme="dark"] .error-msg{background:#2e0f0f;border-color:#5a2222;color:#f0a3a3}
+    .history-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;justify-content:center}
+    .hist-chip{padding:4px 11px;background:var(--input-bg);border:1px solid var(--border);border-radius:999px;font-size:.72rem;font-family:'IBM Plex Mono',monospace;color:var(--sub);cursor:pointer;transition:all .15s}
     .hist-chip:hover{border-color:var(--primary);color:var(--primary)}
-    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--sub);font-size:.78rem}
+    .divider{display:flex;align-items:center;gap:12px;margin:18px 0 8px;color:var(--sub);font-size:.6875rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase}
     .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
-    .setup-link{text-align:center;font-size:.8rem;color:var(--sub);margin-top:16px}
-    .setup-link a{color:var(--primary);text-decoration:none}
-    .theme-toggle{position:fixed;top:16px;right:16px;width:36px;height:36px;background:var(--card);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+    .setup-link{text-align:center;font-size:.8125rem;color:var(--sub);margin-top:16px}
+    .setup-link a{color:var(--primary);text-decoration:none;font-weight:600}
+    .theme-toggle{position:fixed;top:16px;right:16px;width:36px;height:36px;background:var(--card);border:1px solid var(--border);color:var(--sub);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
 
     /* setup panel */
     .setup-panel{display:none}
-    .back-link{color:var(--primary);cursor:pointer;font-size:.82rem;margin-bottom:12px;display:inline-block}
+    .back-link{color:var(--primary);cursor:pointer;font-size:.82rem;margin-bottom:12px;display:inline-block;font-weight:500}
   </style>
 </head>
 <body>
@@ -109,7 +116,7 @@
       <!-- SETUP PANEL -->
       <div id="setup-panel" class="setup-panel">
         <div class="brand">
-          <div class="brand-icon" style="background:#10b981"><i class="fa-solid fa-user-shield"></i></div>
+          <div class="brand-icon" style="background:#15a66b"><i class="fa-solid fa-user-shield"></i></div>
           <h1>Initial Setup</h1>
           <p>Create the first administrator account</p>
         </div>

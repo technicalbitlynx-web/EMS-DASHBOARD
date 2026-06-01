@@ -5,28 +5,28 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>EMS Dashboard — Bank Server Room</title>
 <link rel="manifest" href="/manifest.json"/>
-<meta name="theme-color" content="#2563eb"/>
+<meta name="theme-color" content="#0f8a50"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="EMS"/>
 <link rel="apple-touch-icon" href="/icons/icon-192.png"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <style>
 /* ── Reset & Theme ───────────────────────────────────────────── */
 :root{
-  --bg:#f0f4f8;--card:#fff;--card2:#f8fafc;--border:#e2e8f0;
-  --text:#1e293b;--sub:#64748b;--nav:#1e293b;--nav-text:#f1f5f9;
-  --primary:#2563eb;--primary-hov:#1d4ed8;
-  --normal:#22c55e;--warning:#f59e0b;--critical:#ef4444;
-  --shadow:0 2px 12px rgba(0,0,0,.07);--radius:12px;
+  --bg:#f3f7f4;--card:#fff;--card2:#eaf0ec;--border:#dde7e0;
+  --text:#14201a;--sub:#586b60;--nav:#111b15;--nav-text:#e6f0ea;
+  --primary:#0f8a50;--primary-hov:#0b6f40;
+  --normal:#15a66b;--warning:#e0901b;--critical:#dc3838;
+  --shadow:0 1px 2px rgba(10,19,14,.06);--radius:10px;
 }
 [data-theme=dark]{
-  --bg:#0f172a;--card:#1e293b;--card2:#0f172a;--border:#334155;
-  --text:#f1f5f9;--sub:#94a3b8;--nav:#020617;--nav-text:#f1f5f9;
-  --shadow:0 2px 12px rgba(0,0,0,.4);
+  --bg:#0a130e;--card:#111b15;--card2:#0c140f;--border:#243a2c;
+  --text:#e6f0ea;--sub:#95a89d;--nav:#060d09;--nav-text:#e6f0ea;--primary:#34c07d;--primary-hov:#4fce92;
+  --shadow:0 4px 16px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s;overflow-x:hidden}
@@ -220,6 +220,11 @@ input:focus,select:focus{border-color:var(--primary)}
   transform:translateY(80px);transition:transform .25s;z-index:999;display:flex;align-items:center;gap:8px;
 }
 #toast.show{transform:translateY(0)}
+/* ── Green design system overrides ── */
+body,button,input,select,textarea{font-family:'IBM Plex Sans',-apple-system,sans-serif!important}
+.sensor-val,.gauge-val,.stat-val,#energy-kwh,.door-state{font-family:'IBM Plex Mono',ui-monospace,monospace!important;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.nav-tab{font-weight:500}
+.section-title i{color:var(--primary)}
 </style>
 </head>
 <body>
@@ -309,7 +314,7 @@ input:focus,select:focus{border-color:var(--primary)}
       <div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;font-weight:600">VOLTAGE</div>
       <svg class="gauge-svg" viewBox="0 0 100 100">
         <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" transform="rotate(-90 50 50)"/>
-        <circle class="gauge-arc" id="gauge-volt-arc" cx="50" cy="50" r="42" stroke="#2563eb" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc" id="gauge-volt-arc" cx="50" cy="50" r="42" stroke="#0f8a50" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
         <text class="gauge-val" x="50" y="47" text-anchor="middle" id="gauge-volt-val">—</text>
         <text class="gauge-unit" x="50" y="58" text-anchor="middle">V</text>
       </svg>
@@ -329,7 +334,7 @@ input:focus,select:focus{border-color:var(--primary)}
       <div style="font-size:.8rem;color:var(--sub);margin-bottom:8px;font-weight:600">ACTIVE POWER</div>
       <svg class="gauge-svg" viewBox="0 0 100 100">
         <circle class="gauge-track" cx="50" cy="50" r="42" stroke-dasharray="263.9" transform="rotate(-90 50 50)"/>
-        <circle class="gauge-arc" id="gauge-pwr-arc" cx="50" cy="50" r="42" stroke="#8b5cf6" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
+        <circle class="gauge-arc" id="gauge-pwr-arc" cx="50" cy="50" r="42" stroke="#7c53e6" stroke-dasharray="263.9" stroke-dashoffset="263.9" transform="rotate(-90 50 50)"/>
         <text class="gauge-val" x="50" y="47" text-anchor="middle" id="gauge-pwr-val">—</text>
         <text class="gauge-unit" x="50" y="58" text-anchor="middle">W</text>
       </svg>
@@ -685,7 +690,7 @@ function setGaugeColor(arcId, color) {
 }
 
 function statusColor(status) {
-  return status === 'critical' ? '#ef4444' : status === 'warning' ? '#f59e0b' : '#22c55e';
+  return status === 'critical' ? '#dc3838' : status === 'warning' ? '#e0901b' : '#15a66b';
 }
 function statusBadge(status) {
   return status === 'critical' ? 'badge-critical' : status === 'warning' ? 'badge-warning' : 'badge-normal';
@@ -896,7 +901,7 @@ function updatePowerGauges(data) {
   if (vArc) {
     const pct = Math.min(Math.max((v - 180) / 90, 0), 1);
     vArc.setAttribute('stroke-dashoffset', String((1 - pct) * CIRC));
-    vArc.setAttribute('stroke', v < 200 || v > 260 ? '#ef4444' : v < 210 ? '#f59e0b' : '#2563eb');
+    vArc.setAttribute('stroke', v < 200 || v > 260 ? '#dc3838' : v < 210 ? '#e0901b' : '#0f8a50');
   }
   const vLbl = document.getElementById('gauge-volt-val');
   if (vLbl) vLbl.textContent = v.toFixed(0);
@@ -906,7 +911,7 @@ function updatePowerGauges(data) {
   if (aArc) {
     const pct = Math.min(a / 120, 1);
     aArc.setAttribute('stroke-dashoffset', String((1 - pct) * CIRC));
-    aArc.setAttribute('stroke', a > 100 ? '#ef4444' : a > 80 ? '#f59e0b' : '#22c55e');
+    aArc.setAttribute('stroke', a > 100 ? '#dc3838' : a > 80 ? '#e0901b' : '#15a66b');
   }
   const aLbl = document.getElementById('gauge-curr-val');
   if (aLbl) aLbl.textContent = a.toFixed(1);
@@ -921,7 +926,7 @@ function updatePowerGauges(data) {
   const pfArc = document.getElementById('gauge-pf-arc');
   if (pfArc) {
     pfArc.setAttribute('stroke-dashoffset', String((1 - Math.min(pf, 1)) * CIRC));
-    pfArc.setAttribute('stroke', pf < 0.75 ? '#ef4444' : pf < 0.85 ? '#f59e0b' : '#22c55e');
+    pfArc.setAttribute('stroke', pf < 0.75 ? '#dc3838' : pf < 0.85 ? '#e0901b' : '#15a66b');
   }
   const pfLbl = document.getElementById('gauge-pf-val');
   if (pfLbl) pfLbl.textContent = pf.toFixed(2);
@@ -1186,7 +1191,7 @@ async function generatePdf() {
       head: [['Sensor', 'Type', 'Location', 'Min', 'Max', 'Avg', 'Readings']],
       body: data.readings_summary.map(r => [r.name, r.sensor_type, r.location, r.min_val, r.max_val, r.avg_val, r.reading_count]),
       styles: { fontSize: 8 },
-      headStyles: { fillColor: [37, 99, 235] },
+      headStyles: { fillColor: [15, 138, 80] },
     });
 
     let y = doc.lastAutoTable.finalY + 10;
